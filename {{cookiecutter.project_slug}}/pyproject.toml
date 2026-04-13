@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "{{cookiecutter.package_name}}"
+version = "0.1.0"
+description = "{{cookiecutter.description}}"
+authors = [{ name = "{{cookiecutter.author_name}}", email = "{{cookiecutter.author_email}}" }]
+readme = "README.md"
+license = { text = "{{cookiecutter.licence}}" }
+requires-python = ">={{cookiecutter.python_version}}"
+dependencies = [
+    "numpy",
+    "pandas",
+    "structlog",
+    "python-dotenv",
+    "pydantic-settings",
+    {%- if cookiecutter.use_mlflow == "yes" %}
+    "mlflow",
+    {%- endif %}
+    {%- if cookiecutter.use_spacy == "yes" %}
+    "spacy",
+    {%- endif %}
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/{{cookiecutter.package_name}}"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py{{cookiecutter.python_version.replace('.', '')}}"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "ANN", "B", "SIM"]
+ignore = ["ANN101", "ANN102"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.ty]
+strict = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

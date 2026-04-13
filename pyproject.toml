@@ -1,0 +1,8 @@
+[project]
+name = "corvus"
+version = "0.1.0"
+description = "Cookiecutter template for data science and text analysis projects"
+requires-python = ">=3.10"
+
+[tool.uv]
+dev-dependencies = ["pytest", "pytest-cookies", "hypothesis"]

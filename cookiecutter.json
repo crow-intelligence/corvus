@@ -1,0 +1,28 @@
+{
+  "project_name": "my-project",
+  "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '-').replace('_', '-') }}",
+  "package_name": "{{ cookiecutter.project_slug.replace('-', '_') }}",
+  "description": "A short description of the project.",
+  "author_name": "Crow Intelligence",
+  "author_email": "hello@crowintelligence.org",
+  "python_version": "3.11",
+  "licence": [
+    "MIT",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "GPL-3.0-only",
+    "LGPL-3.0-only",
+    "AGPL-3.0-only",
+    "CC-BY-4.0",
+    "CC-BY-SA-4.0",
+    "CC-BY-NC-4.0",
+    "Proprietary",
+    "Custom"
+  ],
+  "gcs_bucket": "gs://my-bucket",
+  "gcp_project_id": "my-gcp-project",
+  "gcs_region": "EU",
+  "use_mlflow": ["yes", "no"],
+  "mlflow_experiment": "{{ cookiecutter.project_slug }}",
+  "use_spacy": ["no", "yes"]
+}

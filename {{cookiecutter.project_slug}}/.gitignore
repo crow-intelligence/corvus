@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+
+# Environment variables
+.env
+.env.*
+!.env.template
+
+# Jupyter
+.ipynb_checkpoints/
+
+# DVC — tracked via DVC not git
+data/raw/
+data/processed/
+data/external/
+models/
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/external/.gitkeep
+!models/.gitkeep
+
+# MLflow local tracking store
+mlruns/
+mlartifacts/
+
+# Reports output
+reports/figures/*.png
+reports/figures/*.pdf
+reports/figures/*.svg
+
+# Sphinx build
+docs/_build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Tool caches
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# GCP credentials — never commit
+service-account*.json
+gcp-*.json
+*-credentials.json
