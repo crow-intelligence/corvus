@@ -25,6 +25,9 @@ GCS_REGION        = "{{cookiecutter.gcs_region}}"
 USE_MLFLOW        = "{{cookiecutter.use_mlflow}}" == "yes"
 MLFLOW_EXPERIMENT = "{{cookiecutter.mlflow_experiment}}"
 USE_SPACY         = "{{cookiecutter.use_spacy}}" == "yes"
+INSTALL_PYTHON_SKILLS    = "{{cookiecutter.install_claude_skills_python}}" == "yes"
+INSTALL_ANALYTICS_SKILLS = "{{cookiecutter.install_claude_skills_analytics}}" == "yes"
+INSTALL_ANTHROPIC_SKILLS = "{{cookiecutter.install_claude_skills_anthropic}}" == "yes"
 
 # GCS is "real" only if the user changed the placeholder values
 GCS_ENABLED = (
@@ -127,9 +130,15 @@ def setup_python() -> None:
     ).stdout
     if version not in installed:
         print(f"  Python {version} not found — installing via pyenv (this may take a moment)...")
-        run(["pyenv", "install", version])
+        result = run(["pyenv", "install", version], check=False)
+        if result.returncode != 0:
+            warn(
+                f"pyenv install {version} failed — continuing without a pinned Python.\n"
+                f"  Install manually once build deps are in place: pyenv install {version}"
+            )
+            return
 
-    run(["pyenv", "local", version])
+    run(["pyenv", "local", version], check=False)
     print(f"  ✓ Python {version} set via pyenv.")
 
 
@@ -152,10 +161,13 @@ def setup_uv() -> None:
     run(["uv", "add"] + runtime)
 
     # Dev deps
+    #   dvc[gs]  — data versioning with GCS remote support
+    #   pyyaml   — consumed by scripts/install-skills.py
     run([
         "uv", "add", "--dev",
         "ruff", "ty", "pre-commit", "nbstripout",
         "pytest", "sphinx", "sphinx-rtd-theme",
+        "dvc[gs]", "pyyaml",
     ])
     print("  ✓ uv initialised and dependencies installed.")
 
@@ -167,7 +179,9 @@ def setup_dvc() -> None:
         return
 
     dvc = ["uv", "run", "dvc"]
-    run(dvc + ["init"])
+    # The template ships a minimal .dvc/config; re-initialise in-place so DVC
+    # writes the rest of its internal metadata without complaining.
+    run(dvc + ["init", "-f"], check=False)
 
     if GCS_ENABLED:
         dvc_remote = f"{GCS_BUCKET}/dvc"
@@ -230,6 +244,32 @@ def remove_mlflow_files() -> None:
         tracking.unlink()
 
 
+def prune_python_skills() -> None:
+    """Delete the vendored Honnibal skill pack if the user opted out."""
+    python_skills = Path(".claude/skills/python-quality")
+    if not INSTALL_PYTHON_SKILLS and python_skills.exists():
+        shutil.rmtree(python_skills)
+
+
+def fetch_optional_skills() -> None:
+    """Clone nimrodfisher / Anthropic skill packs if the corresponding flags are yes."""
+    if not (INSTALL_ANALYTICS_SKILLS or INSTALL_ANTHROPIC_SKILLS):
+        return
+
+    print("\n── Claude Code skills (fetched) ─────────────────────────────────────")
+    script = Path("scripts/install-skills.py")
+    if not script.exists():
+        warn(f"skills installer missing at {script} — skipping fetch.")
+        return
+    if not tool_available("uv"):
+        warn("uv not available — run `make install-skills` manually later.")
+        return
+
+    result = run(["uv", "run", "python", str(script)], check=False)
+    if result.returncode != 0:
+        warn("skills installer exited non-zero — see output above.")
+
+
 def setup_precommit() -> None:
     print("\n── pre-commit ───────────────────────────────────────────────────────")
     result = run(["uv", "run", "pre-commit", "install"], check=False)
@@ -241,10 +281,15 @@ def setup_precommit() -> None:
     print("  ✓ pre-commit hooks installed.")
 
 
+def setup_git_init() -> None:
+    """Initialise the git repo early — DVC init requires an SCM root to exist."""
+    print("\n── git init ─────────────────────────────────────────────────────────")
+    run(["git", "init"], check=False)
+
+
 def setup_git() -> None:
-    print("\n── git ──────────────────────────────────────────────────────────────")
-    run(["git", "init"])
-    run(["git", "add", "."])
+    print("\n── git commit ───────────────────────────────────────────────────────")
+    run(["git", "add", "."], check=False)
     mlflow_note = f"- MLflow (local tracking, GCS artifacts)\n" if USE_MLFLOW else ""
     gcs_note = f"- DVC remote at {GCS_BUCKET}/dvc\n" if GCS_ENABLED else "- DVC (GCS remote not yet configured)\n"
     msg = (
@@ -257,8 +302,16 @@ def setup_git() -> None:
         "- Sphinx docs scaffold\n"
         f"- Licence: {LICENCE}\n"
     )
-    run(["git", "commit", "-m", msg])
-    print("  ✓ Initial commit created.")
+    # The initial commit is a convenience — pre-commit hooks or missing git
+    # user config shouldn't abort the whole scaffold.
+    result = run(["git", "commit", "-m", msg], check=False)
+    if result.returncode == 0:
+        print("  ✓ Initial commit created.")
+    else:
+        warn(
+            "git commit failed (missing user.email/user.name, or a pre-commit hook rejected the commit).\n"
+            "  Configure git and run: git commit -m 'chore: initialise corvus project scaffold'"
+        )
 
 
 def print_summary() -> None:
@@ -286,11 +339,14 @@ def print_summary() -> None:
 
 def main() -> None:
     remove_mlflow_files()
+    prune_python_skills()
     setup_licence()
     setup_python()
     setup_uv()
+    setup_git_init()
     setup_gcs_bucket()
     setup_dvc()
+    fetch_optional_skills()
     setup_precommit()
     setup_git()
     print_summary()

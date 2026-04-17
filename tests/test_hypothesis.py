@@ -51,6 +51,9 @@ DEFAULTS = {
     "use_mlflow": "yes",
     "mlflow_experiment": "test-project",
     "use_spacy": "no",
+    "install_claude_skills_python": "yes",
+    "install_claude_skills_analytics": "yes",
+    "install_claude_skills_anthropic": "no",
 }
 
 
@@ -210,6 +213,7 @@ def test_scaffold_is_complete(cookies, name):
         "Makefile",
         "README.md",
         "LICENSE",
+        "CLAUDE.md",
         "pyproject.toml",
         f"src/{pkg}/__init__.py",
         f"src/{pkg}/config.py",
@@ -217,5 +221,23 @@ def test_scaffold_is_complete(cookies, name):
         f"src/{pkg}/py.typed",
         ".dvc/config",
         ".github/workflows/ci.yml",
+        ".claude/settings.json",
+        ".claude/skills/MANIFEST.yaml",
+        ".claude/skills/README.md",
+        "scripts/install-skills.py",
     ]:
         assert (root / path).exists(), f"Missing {path} for project {name!r}"
+
+
+@given(install=st.sampled_from(["yes", "no"]))
+@SLOW
+def test_python_skills_iff_flag(cookies, install):
+    """The vendored python-quality pack exists iff the flag is yes."""
+    result = bake(cookies, {"install_claude_skills_python": install})
+    assume(result.exit_code == 0)
+    pack = result.project_path / ".claude" / "skills" / "python-quality"
+    if install == "yes":
+        assert pack.exists()
+        assert (pack / "pre-mortem" / "SKILL.md").exists()
+    else:
+        assert not pack.exists()

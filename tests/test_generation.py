@@ -21,6 +21,9 @@ DEFAULTS = {
     "use_mlflow": "yes",
     "mlflow_experiment": "test-project",
     "use_spacy": "no",
+    "install_claude_skills_python": "yes",
+    "install_claude_skills_analytics": "yes",
+    "install_claude_skills_anthropic": "no",
 }
 
 
@@ -86,3 +89,47 @@ def test_spacy_not_in_pyproject_when_disabled(cookies):
 def test_invalid_project_name_fails(cookies):
     result = bake(cookies, {"project_name": "My Invalid Project!"})
     assert result.exit_code != 0
+
+
+def test_claude_md_always_created(cookies):
+    result = bake(cookies)
+    assert (result.project_path / "CLAUDE.md").exists()
+
+
+def test_claude_md_templates_package_name(cookies):
+    result = bake(cookies, {"project_name": "my-nlp-project"})
+    claude_md = (result.project_path / "CLAUDE.md").read_text()
+    assert "my_nlp_project" in claude_md
+    assert "my-nlp-project" in claude_md
+
+
+def test_python_skills_bundled_when_enabled(cookies):
+    result = bake(cookies, {"install_claude_skills_python": "yes"})
+    pack = result.project_path / ".claude" / "skills" / "python-quality"
+    assert (pack / "pre-mortem" / "SKILL.md").exists()
+    assert (pack / "LICENSE").exists()
+
+
+def test_python_skills_absent_when_disabled(cookies):
+    result = bake(cookies, {"install_claude_skills_python": "no"})
+    assert not (
+        result.project_path / ".claude" / "skills" / "python-quality"
+    ).exists()
+
+
+def test_claude_manifest_and_settings_always_present(cookies):
+    result = bake(cookies)
+    assert (result.project_path / ".claude" / "settings.json").exists()
+    assert (result.project_path / ".claude" / "skills" / "MANIFEST.yaml").exists()
+    assert (result.project_path / ".claude" / "skills" / "README.md").exists()
+
+
+def test_install_skills_script_present(cookies):
+    result = bake(cookies)
+    assert (result.project_path / "scripts" / "install-skills.py").exists()
+
+
+def test_install_skills_make_target_present(cookies):
+    result = bake(cookies)
+    makefile = (result.project_path / "Makefile").read_text()
+    assert "install-skills" in makefile

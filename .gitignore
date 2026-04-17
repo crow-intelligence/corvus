@@ -18,6 +18,7 @@ tests/baked_cookies/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+.hypothesis/
 
 # OS
 .DS_Store

@@ -8,7 +8,7 @@
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)](https://github.com/crow-intelligence/corvus/blob/main/cookiecutter.json)
 [![Licence: MIT](https://img.shields.io/badge/licence-MIT-green)](LICENSE)
 
-A [cookiecutter](https://github.com/cookiecutter/cookiecutter) template for data science and text analysis projects. Born as the internal template we use at [Crow Intelligence](https://crow-intelligence.github.io/) for our computational linguistics and NLP research — and now available for anyone to use.
+A [cookiecutter](https://github.com/cookiecutter/cookiecutter) template for data-science, statistics, and text-analysis projects. Born as the internal template we use at [Crow Intelligence](https://crow-intelligence.github.io/) for day-to-day analytics, modelling, and NLP research — and now available for anyone to use.
 
 ---
 
@@ -24,8 +24,9 @@ A project ready to work in, with no manual setup:
 - **[structlog](https://www.structlog.org/)** for structured logging
 - **[pydantic-settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)** + **python-dotenv** for typed config and GCS credential management
 - **Sphinx** docs scaffold (autodoc, napoleon, RTD theme)
+- **Claude Code integration** — a per-project `CLAUDE.md` and pre-installed skill packs (see below)
 - Sensible `.gitignore` and `.dvcignore` defaults
-- A `Makefile` with `make help`, `make lint`, `make test`, `make dvc-push`, and more
+- A `Makefile` with `make help`, `make lint`, `make test`, `make dvc-push`, `make install-skills`, and more
 
 ### Project structure
 
@@ -84,6 +85,9 @@ make help               # see all available commands
 | `use_mlflow` | `yes` | Adds MLflow and generates `tracking.py` |
 | `mlflow_experiment` | project name | MLflow experiment name |
 | `use_spacy` | `no` | Adds spaCy to runtime deps |
+| `install_claude_skills_python` | `yes` | Vendor Matthew Honnibal's Python code-quality skills (MIT) |
+| `install_claude_skills_analytics` | `yes` | Fetch nimrodfisher's 30 data-analytics skills at generation time |
+| `install_claude_skills_anthropic` | `no` | Fetch Anthropic's official skill library (Apache-2.0) |
 
 ---
 
@@ -133,6 +137,29 @@ uv run dvc push
 # On another machine:
 uv run dvc pull
 ```
+
+---
+
+## Claude Code integration
+
+Every generated project ships with:
+
+- **`CLAUDE.md`** at the project root — per-project context (package name, Python version, layout, commands, MLflow/spaCy flags) that Claude Code loads automatically at session start.
+- **`.claude/skills/`** — pre-installed skill packs that Claude Code discovers on open.
+
+### Skill packs
+
+| Pack | Source | Default | Licence |
+|---|---|---|---|
+| `python-quality` | [honnibal/claude-skills](https://github.com/honnibal/claude-skills) — vendored into this template | `yes` | MIT |
+| `data-analytics` | [nimrodfisher/data-analytics-skills](https://github.com/nimrodfisher/data-analytics-skills) — fetched at generation | `yes` | unspecified upstream |
+| `anthropic` | [anthropics/skills](https://github.com/anthropics/skills) — fetched at generation | `no` | Apache-2.0 |
+
+Flip any of these off at cookiecutter time. To change your mind later, edit `.claude/skills/MANIFEST.yaml` in the generated project and run `make install-skills`.
+
+### Scope
+
+These skills are **project-scoped** — they live in the project's git repo and apply only when Claude Code is open in that project. For machine-wide skills, either symlink entries into `~/.claude/skills/` or install them there directly; project-level skills take precedence when both exist.
 
 ---
 

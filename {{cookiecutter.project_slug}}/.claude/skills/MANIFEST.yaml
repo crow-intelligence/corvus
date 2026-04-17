@@ -1,0 +1,33 @@
+# Claude Code skill packs installed into this project.
+#
+# - `python-quality` is vendored directly inside this repo (MIT, Matthew Honnibal).
+# - Other packs are fetched from upstream at generation time (or via `make install-skills`).
+#   To change what's installed, flip the `install` flag and run `make install-skills`.
+#
+# Fetched packs are namespaced under `.claude/skills/<pack-name>/` so they can't
+# collide with one another. Their upstream LICENCE (or UPSTREAM.md fallback) is
+# preserved so attribution stays clear.
+
+packs:
+  - name: python-quality
+    source: vendored
+    install: {{ cookiecutter.install_claude_skills_python }}
+    description: Python code-quality skills — pre-mortem, contract-docstrings, try-except, tighten-types, hypothesis-tests, mutation-testing, stub-package.
+    upstream: https://github.com/honnibal/claude-skills
+    licence: MIT
+
+  - name: data-analytics
+    source: fetched
+    install: {{ cookiecutter.install_claude_skills_analytics }}
+    description: Analytics-focused skills — data quality, documentation, investigation, viz, stakeholder communication, workflow.
+    upstream: https://github.com/nimrodfisher/data-analytics-skills
+    ref: main
+    licence: "unspecified (upstream has no LICENSE file)"
+
+  - name: anthropic
+    source: fetched
+    install: {{ cookiecutter.install_claude_skills_anthropic }}
+    description: Anthropic's official skill library — data, documents, d3 visualisation, etc.
+    upstream: https://github.com/anthropics/skills
+    ref: main
+    licence: Apache-2.0

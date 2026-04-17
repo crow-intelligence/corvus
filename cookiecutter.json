@@ -24,5 +24,8 @@
   "gcs_region": "EU",
   "use_mlflow": ["yes", "no"],
   "mlflow_experiment": "{{ cookiecutter.project_slug }}",
-  "use_spacy": ["no", "yes"]
+  "use_spacy": ["no", "yes"],
+  "install_claude_skills_python": ["yes", "no"],
+  "install_claude_skills_analytics": ["yes", "no"],
+  "install_claude_skills_anthropic": ["no", "yes"]
 }

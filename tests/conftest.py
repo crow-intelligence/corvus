@@ -28,6 +28,14 @@ def skip_post_gen_hook(monkeypatch):
                 )
                 if os.path.exists(tracking):
                     os.remove(tracking)
+            # Replicate prune_python_skills() so skills tests pass
+            if cc.get("install_claude_skills_python") != "yes":
+                import shutil
+                python_skills = os.path.join(
+                    str(project_dir), ".claude", "skills", "python-quality"
+                )
+                if os.path.isdir(python_skills):
+                    shutil.rmtree(python_skills)
             return
         return _original_run_hook(
             repo_dir, hook_name, project_dir, context, delete_project_on_failure

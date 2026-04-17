@@ -1,4 +1,4 @@
-.PHONY: help install lint fmt typecheck test docs dvc-push dvc-pull clean
+.PHONY: help install lint fmt typecheck test docs dvc-push dvc-pull install-skills clean
 
 help:           ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -28,6 +28,9 @@ dvc-push:       ## Push data and models to GCS
 
 dvc-pull:       ## Pull data and models from GCS
 	uv run dvc pull
+
+install-skills: ## Install Claude Code skill packs per .claude/skills/MANIFEST.yaml
+	uv run python scripts/install-skills.py
 
 clean:          ## Remove build artifacts and caches
 	rm -rf dist/ build/ docs/_build/ .pytest_cache/ .ruff_cache/

@@ -19,11 +19,14 @@ venv/
 # Jupyter
 .ipynb_checkpoints/
 
-# DVC — tracked via DVC not git
-data/raw/
-data/processed/
-data/external/
-models/
+# DVC — tracked via DVC not git.
+# Use glob (data/raw/*) rather than directory (data/raw/) so the .gitkeep
+# negations below actually work — `dir/` ignores the whole dir and defeats
+# any later `!dir/file` rules.
+data/raw/*
+data/processed/*
+data/external/*
+models/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/external/.gitkeep
