@@ -3,7 +3,7 @@
 {{ cookiecutter.description }}
 
 - **Package:** `{{ cookiecutter.package_name }}` (importable as `from {{ cookiecutter.package_name }} import ...`)
-- **Python:** {{ cookiecutter.python_version }} (via pyenv, see `.python-version`)
+- **Python:** {{ cookiecutter.python_version }} (managed by uv, pinned in `.python-version`)
 - **Package manager:** uv — all commands prefixed with `uv run`
 - **Linter / formatter:** ruff (line length 88) — `make lint`, `make fmt`
 - **Type checker:** ty — `make typecheck`

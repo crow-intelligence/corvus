@@ -16,7 +16,7 @@ A [cookiecutter](https://github.com/cookiecutter/cookiecutter) template for data
 
 A project ready to work in, with no manual setup:
 
-- **Python** at the version you choose, set via [pyenv](https://github.com/pyenv/pyenv)
+- **Python** at the version you choose, installed and pinned by [uv](https://docs.astral.sh/uv/) (downloads a prebuilt python-build-standalone binary — no system build deps required)
 - **[uv](https://docs.astral.sh/uv/)** as package manager with a locked `uv.lock`
 - **[ruff](https://docs.astral.sh/ruff/)** for linting and formatting + **[ty](https://github.com/astral-sh/ty)** for type checking, both wired into pre-commit
 - **[DVC](https://dvc.org/)** for data versioning with a GCS remote
@@ -77,7 +77,7 @@ make help               # see all available commands
 | Prompt | Default | Notes |
 |--------|---------|-------|
 | `project_name` | `my-project` | Slug and package name are derived automatically |
-| `python_version` | `3.11` | Installed via pyenv if not present |
+| `python_version` | `3.11` | Installed via `uv python install` — `3.11` resolves to the latest patch |
 | `licence` | `MIT` | MIT, BSD 2/3, GPL/LGPL/AGPL v3, CC BY/BY-SA/BY-NC, Proprietary, Custom |
 | `gcs_bucket` | `gs://my-bucket` | Used for DVC remote and MLflow artifacts |
 | `gcp_project_id` | `my-gcp-project` | Required for GCS bucket operations |
@@ -95,8 +95,7 @@ make help               # see all available commands
 
 Before running corvus, you need:
 
-- [pyenv](https://github.com/pyenv/pyenv) — Python version management
-- [uv](https://docs.astral.sh/uv/) — package manager (`curl -LsSf https://astral.sh/uv/install.sh | sh`)
+- [uv](https://docs.astral.sh/uv/) — package manager and Python installer (`curl -LsSf https://astral.sh/uv/install.sh | sh`)
 - [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) — for DVC and MLflow on GCS (optional; you can configure GCS later)
 
 ---

@@ -1,7 +1,7 @@
 """Test configuration for corvus template tests.
 
 Patches the post-generation hook so that tests validate the rendered file tree
-without running the heavy automation (pyenv, uv, DVC, git). The pre-generation
+without running the heavy automation (uv, DVC, git). The pre-generation
 hook (input validation) still runs normally.
 """
 

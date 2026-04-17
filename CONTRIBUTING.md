@@ -35,7 +35,7 @@ the template and verify the rendered output without running the post-gen hook.
 uv run pytest tests/ -v
 ```
 
-To manually test the full flow including the post-gen hook (pyenv, uv, DVC, git):
+To manually test the full flow including the post-gen hook (uv, DVC, git):
 
 ```bash
 uvx cookiecutter . --no-input
@@ -47,7 +47,7 @@ uvx cookiecutter . --no-input
 
 **Good candidates for PRs:**
 
-- Bug fixes in the post-gen hook (pyenv, uv, DVC, GCS setup)
+- Bug fixes in the post-gen hook (uv, DVC, GCS setup)
 - Improvements to the `.gitignore` or `.dvcignore` defaults
 - Better error messages or recovery in the hook
 - Additional test coverage for the template

@@ -1,7 +1,8 @@
 """Post-generation hook for corvus.
 
 Runs inside the newly created project directory after cookiecutter renders
-the template. Orchestrates: pyenv, uv, DVC, MLflow config, git, pre-commit.
+the template. Orchestrates: uv (Python + deps), DVC, MLflow config, git,
+pre-commit.
 """
 
 from __future__ import annotations
@@ -102,44 +103,29 @@ def setup_licence() -> None:
 
 def setup_python() -> None:
     print("\n── Python ───────────────────────────────────────────────────────────")
-    if not tool_available("pyenv"):
+    if not tool_available("uv"):
         warn(
-            "pyenv not found. Install it from https://github.com/pyenv/pyenv\n"
-            "  Then run: pyenv install <version> && pyenv local <version>"
+            "uv not found — install it first:\n"
+            "  curl -LsSf https://astral.sh/uv/install.sh | sh\n"
+            "  Then re-run: uv python install {ver} && uv python pin {ver}".format(
+                ver=PYTHON_VERSION
+            )
         )
         return
 
-    # Resolve latest patch version for the requested minor (e.g. 3.11 → 3.11.12)
-    if PYTHON_VERSION.count(".") == 1:
-        result = run(
-            ["pyenv", "install", "--list"],
-            capture_output=True, text=True, check=False
+    # uv accepts "3.11" (resolves to latest patch) or exact "3.11.15" and
+    # downloads a python-build-standalone binary — no system build deps, no
+    # source compilation.
+    result = run(["uv", "python", "install", PYTHON_VERSION], check=False)
+    if result.returncode != 0:
+        warn(
+            f"uv python install {PYTHON_VERSION} failed — continuing.\n"
+            f"  Retry manually: uv python install {PYTHON_VERSION}"
         )
-        candidates = [
-            line.strip() for line in result.stdout.splitlines()
-            if line.strip().startswith(PYTHON_VERSION + ".")
-            and line.strip().replace(".", "").isdigit()
-        ]
-        version = candidates[-1] if candidates else PYTHON_VERSION
-    else:
-        version = PYTHON_VERSION
+        return
 
-    # Check if already installed
-    installed = run(
-        ["pyenv", "versions", "--bare"], capture_output=True, text=True, check=False
-    ).stdout
-    if version not in installed:
-        print(f"  Python {version} not found — installing via pyenv (this may take a moment)...")
-        result = run(["pyenv", "install", version], check=False)
-        if result.returncode != 0:
-            warn(
-                f"pyenv install {version} failed — continuing without a pinned Python.\n"
-                f"  Install manually once build deps are in place: pyenv install {version}"
-            )
-            return
-
-    run(["pyenv", "local", version], check=False)
-    print(f"  ✓ Python {version} set via pyenv.")
+    run(["uv", "python", "pin", PYTHON_VERSION], check=False)
+    print(f"  ✓ Python {PYTHON_VERSION} installed and pinned via uv.")
 
 
 def setup_uv() -> None:
@@ -294,7 +280,7 @@ def setup_git() -> None:
     gcs_note = f"- DVC remote at {GCS_BUCKET}/dvc\n" if GCS_ENABLED else "- DVC (GCS remote not yet configured)\n"
     msg = (
         "chore: initialise corvus project scaffold\n\n"
-        f"- Python {PYTHON_VERSION} via pyenv\n"
+        f"- Python {PYTHON_VERSION} via uv\n"
         "- uv + ruff + ty + pre-commit\n"
         "- structlog logging, pydantic-settings config\n"
         f"{mlflow_note}"

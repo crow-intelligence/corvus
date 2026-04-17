@@ -3,8 +3,8 @@
 #
 # Runs `uvx cookiecutter . --no-input` under several flag combinations and
 # asserts the expected file tree + key content. Keeps GCS placeholders so the
-# hook does NOT touch real cloud state. pyenv / uv / dvc / git / git-clone
-# all run for real.
+# hook does NOT touch real cloud state. uv / dvc / git / git-clone all
+# run for real.
 #
 # Usage: scripts/smoke-test.sh [scenario-letter]   # e.g. A, B, ALL (default)
 set -o pipefail
